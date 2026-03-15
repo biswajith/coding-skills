@@ -21,19 +21,29 @@ from pathlib import Path
 
 
 def find_solr_url() -> str:
+    # 1. .claude/STACK.md
+    stack_path = Path(".claude/STACK.md")
+    if stack_path.exists():
+        m = re.search(r"\*\*SOLR_URL:\*\*\s*(http[^\s\n]+)", stack_path.read_text())
+        if m:
+            return m.group(1).rstrip("/")
+
+    # 2. env var
     url = os.getenv("SOLR_URL")
     if url:
         return url.rstrip("/")
-    for props_path in [Path("src/main/resources/application.properties")]:
-        if props_path.exists():
-            with open(props_path) as f:
-                for line in f:
-                    line = line.strip()
-                    if ("solr" in line.lower()) and "=" in line:
-                        _, _, v = line.partition("=")
-                        v = v.strip()
-                        if v.startswith("http"):
-                            return v.rstrip("/")
+
+    # 3. application.properties
+    props_path = Path("src/main/resources/application.properties")
+    if props_path.exists():
+        with open(props_path) as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith(("spring.data.solr.host", "solr.url", "solr.host")) and "=" in line:
+                    _, _, v = line.partition("=")
+                    return v.strip().rstrip("/")
+
+    # 4. application.yml / application.yaml
     for yml in [Path("src/main/resources/application.yml"), Path("src/main/resources/application.yaml")]:
         if yml.exists():
             with open(yml) as f:
@@ -41,6 +51,7 @@ def find_solr_url() -> str:
             m = re.search(r"host:\s*(http[^\s\n]+)", content)
             if m:
                 return m.group(1).rstrip("/")
+
     return "http://localhost:8983/solr"
 
 

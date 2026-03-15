@@ -7,13 +7,13 @@ Reusable agent skills for Java Spring development with OpenAI, Solr, and MySQL.
 | Skill | Invoke | Purpose |
 |---|---|---|
 | `architect-plan` | `/architect-plan` | Sr. Architect persona — produces a structured feature plan doc |
+| `plan-review` | `/plan-review <plan-name>` | Peer-reviews an architect plan before handing off to TDD |
 | `tdd-workflow` | `/tdd-workflow <plan-name>` | Red-Green-Refactor TDD cycle driven by approved plan |
 | `code-review` | `/code-review <plan-name>` | Code review cross-checked against plan and STACK.md |
 | `plan-adherence` | `/plan-adherence <plan-name>` | Scores how faithfully code matches the approved plan |
 | `github-review-comments` | `/github-review-comments <PR#>` | Fetches PR review comments and produces an action plan |
 | `mysql-debug` | `/mysql-debug` | Connects to MySQL, inspects schema, debugs queries and entity issues |
 | `solr-debug` | `/solr-debug` | Connects to Solr, inspects schema, debugs search and indexing issues |
-| `jellyfish-insights` | `/jellyfish-insights` | Surfaces DORA metrics and delivery insights from Jellyfish |
 
 ## Setup per project
 
@@ -27,13 +27,15 @@ Reusable agent skills for Java Spring development with OpenAI, Solr, and MySQL.
 ## Workflow
 
 ```
-/architect-plan          → produces .claude/plans/<feature>.md
-  ↓ (team reviews & approves)
-/tdd-workflow <feature>  → implements via Red-Green-Refactor
+/architect-plan           → produces .claude/plans/<feature>.md
+  ↓ (team reviews)
+/plan-review <feature>    → structured peer review → APPROVE / REQUEST CHANGES
+  ↓ (approved)
+/tdd-workflow <feature>   → implements via Red-Green-Refactor
   ↓
 /plan-adherence <feature> → scores code vs plan (need ≥80% to PR)
   ↓
-/code-review <feature>   → full quality review
+/code-review <feature>    → full quality review
   ↓
 /github-review-comments <PR#> → address reviewer feedback
 ```

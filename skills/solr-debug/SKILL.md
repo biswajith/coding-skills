@@ -128,7 +128,4 @@ Compare the Solr schema fields against field names used in the Spring repository
 
 - [scripts/solr-schema.py](scripts/solr-schema.py) — core and schema introspection
 - [scripts/solr-query.py](scripts/solr-query.py) — query runner, debug, and analysis helper
-
-## Additional resources
-
 - [STACK-TEMPLATE.md](STACK-TEMPLATE.md) — template for `.claude/STACK.md`

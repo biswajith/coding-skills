@@ -95,8 +95,8 @@ Output as markdown (user can save to `.claude/plans/<name>-adherence.md`):
 | Repository Layer | ... | ... |
 | Service Layer | ... | ... |
 | REST API Contract | ... | ... |
-| OpenAI/ADK | ... | ... |
-| Solr | ... | ... |
+| AI / Agentic Integration | ... | ... |
+| Search Integration | ... | ... |
 | Security | ... | ... |
 | Test Coverage | ... | ... |
 

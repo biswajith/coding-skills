@@ -6,10 +6,37 @@ Requires: pip install mysql-connector-python pyyaml
 """
 
 import os
-import sys
 import re
-import json
+import sys
 from pathlib import Path
+
+
+def load_from_stack_md():
+    stack_path = Path(".claude/STACK.md")
+    if not stack_path.exists():
+        return None
+    text = stack_path.read_text()
+    def extract(key):
+        m = re.search(rf"\*\*{key}:\*\*\s*([^\n]+)", text)
+        if not m:
+            return None
+        v = m.group(1).strip()
+        return None if not v or v.startswith("(") else v
+
+    host = extract("DB_HOST")
+    port = extract("DB_PORT")
+    db   = extract("DB_NAME")
+    user = extract("DB_USER")
+    pwd  = extract("DB_PASSWORD")
+    if host or db or user:
+        return {
+            "host": host or "localhost",
+            "port": int(port) if port and port.isdigit() else 3306,
+            "database": db,
+            "user": user,
+            "password": pwd or os.getenv("DB_PASSWORD"),
+        }
+    return None
 
 
 def load_from_env():
@@ -66,17 +93,16 @@ def load_from_yaml(path: Path):
 
 
 def find_config():
-    search_paths = [
+    config = load_from_stack_md()
+    if config:
+        return config
+    for p in [
         Path("src/main/resources/application.properties"),
         Path("src/main/resources/application.yml"),
         Path("src/main/resources/application.yaml"),
-    ]
-    for p in search_paths:
+    ]:
         if p.exists():
-            if p.suffix == ".properties":
-                return load_from_properties(p)
-            else:
-                return load_from_yaml(p)
+            return load_from_properties(p) if p.suffix == ".properties" else load_from_yaml(p)
     return load_from_env()
 
 

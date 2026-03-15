@@ -1,0 +1,14 @@
+# Project-specific credentials and config
+.claude/STACK.md
+.claude/jellyfish.md
+.claude/plans/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# macOS
+.DS_Store
