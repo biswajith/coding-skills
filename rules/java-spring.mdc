@@ -36,6 +36,16 @@ globs: **/*.java
 - Return `ProblemDetail` (RFC 9457) for error responses — consistent structure across all endpoints
 - Use `ResponseEntity<Void>` for 204 No Content — do not return `null`
 
+## AOP (Aspect-Oriented Programming)
+- Use AOP for cross-cutting concerns only: logging, auditing, timing, security checks, retry — not for business logic
+- Annotate aspects with `@Aspect` + `@Component` — never instantiate aspects manually
+- Prefer method-level annotations as pointcut markers (e.g., `@Audited`, `@Timed`) over broad package-level pointcuts — broad pointcuts are fragile and hard to reason about
+- AOP proxies only intercept `public` methods called from outside the bean — `private` and `self` calls bypass the proxy; never rely on AOP for those
+- `@Around` advice must always call `joinPoint.proceed()` or explicitly return a value — forgetting `proceed()` silently swallows the method call
+- Keep advice methods short and free of business logic — if an advice method is doing domain work, it belongs in a service
+- Order multiple aspects on the same method explicitly with `@Order` — undefined ordering causes non-deterministic behavior
+- Do not use AOP to work around bad design (e.g., injecting behavior into entities) — fix the design instead
+
 ## Code quality
 - No method longer than 30 lines — extract to a private method or a collaborator
 - No magic numbers or strings — use named constants or enums

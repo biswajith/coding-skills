@@ -1,5 +1,5 @@
 ---
-description: OpenAI integration best practices — API key handling, retry, timeouts, prompt design, structured output, and cost control. Apply to Java files that call the OpenAI API.
+description: OpenAI integration best practices via Google ADK — agent design, tool definitions, session management, API key handling, retry, timeouts, prompt design, structured output, and cost control. Apply to Java files that use Google ADK or call the OpenAI API.
 globs: **/*.java
 ---
 
@@ -7,30 +7,61 @@ globs: **/*.java
 - API key must come from environment variable or Spring config — never hardcode or log it
 - Use `@Value("${openai.api-key}")` or a `@ConfigurationProperties` class — never inline the string
 - Exclude API key from all log output and `toString()` methods
+- When configuring ADK's `ModelClient`, inject credentials from config — never construct with a literal key
 
-## Resilience
-- All OpenAI calls must have a timeout configured on the HTTP client (recommended: 30s read timeout)
-- Retry on `429 Too Many Requests` with exponential backoff — use Resilience4j or Spring Retry
-- Retry on `5xx` transient errors with a max of 3 attempts
-- Always handle `OpenAIException` at the service boundary — never let it propagate to the controller raw
+## Google ADK — Agent design
+- Each agent must have a single, clearly scoped responsibility — do not build monolithic agents that do everything
+- Define the agent's `instruction` (system prompt) in a config or resource file — not as a Java string literal in code
+- Prefer composing multiple focused agents (multi-agent pattern) over a single agent with many tools
+- Agent `name` and `description` must be meaningful — ADK uses them for routing in multi-agent setups
+- Use `SequentialAgent` for ordered pipelines, `ParallelAgent` for independent concurrent tasks, `LoopAgent` for iterative refinement — choose the right orchestration primitive
+
+## Google ADK — Tool definitions
+- Every tool must be a pure function with respect to its declared side effects — no hidden state mutations
+- Tool method signatures must use only ADK-supported parameter types — document unsupported types explicitly
+- Tool descriptions must be precise and unambiguous — the model uses them to decide when and how to call the tool
+- Tools that write data (DB, API, file) must be idempotent where possible — the model may call them more than once
+- Wrap tool implementations in try/catch and return a structured error string — never let a tool throw unchecked exceptions to the ADK runtime
+- Do not call other agents from within a tool — use sub-agent delegation at the orchestration layer instead
+
+## Google ADK — Session and runner lifecycle
+- Use `InMemorySessionService` for stateless/short-lived sessions; use a persistent `SessionService` for multi-turn conversations that must survive restarts
+- Always close or expire sessions explicitly — do not rely on GC for session cleanup
+- `Runner` instances should be Spring beans (`@Bean`) with `singleton` scope — do not create a new `Runner` per request
+- Pass `sessionId` and `userId` consistently across turns — missing IDs create orphaned sessions
+- Never store sensitive user data in session `state` without encryption or masking
+
+## Google ADK — Callbacks and event handling
+- Use `before_agent_callback` / `after_agent_callback` for cross-cutting concerns (logging, auth checks, rate limiting) — not inside agent logic
+- Use `before_tool_callback` to validate or sanitize tool inputs before execution
+- Use `after_tool_callback` to post-process or audit tool outputs
+- Callbacks must not perform long-running or blocking I/O — offload to async if needed
 
 ## Transaction boundaries
-- Never call the OpenAI API inside a `@Transactional` method
-- If you need to persist results of an AI call, call OpenAI first, then open a transaction to persist
+- Never call ADK `Runner.runAsync()` or any OpenAI API inside a `@Transactional` method
+- If you need to persist agent output, complete the agent run first, then open a transaction to persist the result
 
-## Prompt design
-- Prompts must not be unbounded — always set a `max_tokens` or equivalent limit
+## Resilience
+- Configure a timeout on the ADK `ModelClient` HTTP client (recommended: 60s for agentic flows)
+- Retry on `429 Too Many Requests` with exponential backoff — use Resilience4j or Spring Retry
+- Retry on `5xx` transient errors with a max of 3 attempts
+- Handle ADK and OpenAI exceptions at the service boundary — never let them propagate to the controller raw
+- Implement a fallback response for when the agent fails — do not leave the user with an unhandled error
+
+## Prompt and instruction design
+- Prompts must not be unbounded — always set `maxOutputTokens` or equivalent limit on the model config
 - User-supplied content injected into a prompt must be sanitized and bounded in length
-- System prompts belong in config or resource files — not hardcoded in Java strings
-- Document the token budget for each prompt in a comment: expected input tokens + max output tokens
+- System instructions belong in config or resource files — not hardcoded in Java strings
+- Document the token budget for each agent in a comment: expected input tokens + max output tokens
+- Be explicit about output format in the instruction — if you expect JSON, say so; if structured output is available, use it
 
 ## Structured output
-- Prefer structured output (JSON mode or response_format) over parsing free-text responses
+- Prefer structured output (JSON mode or `response_schema`) over parsing free-text responses
 - The Java type used for deserialization must match the schema exactly — validate on startup if possible
 - Handle `null` fields in the response gracefully — the model may omit optional fields
 
 ## Cost control
-- Use the cheapest model that meets accuracy requirements — document the model choice and why
-- Batch requests where the API supports it
-- Log token usage (`prompt_tokens`, `completion_tokens`) at DEBUG level for cost monitoring
-- Do not call the API in a loop without a circuit breaker or rate limit guard
+- Use the cheapest model that meets accuracy requirements — document the model choice and why in a comment
+- Log token usage (`inputTokenCount`, `outputTokenCount`) at DEBUG level per agent invocation
+- Do not invoke an agent in a loop without a circuit breaker, iteration limit, or explicit termination condition
+- In `LoopAgent`, always define a clear exit condition — an unbounded loop is a runaway cost risk
