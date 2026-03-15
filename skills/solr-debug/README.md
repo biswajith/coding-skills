@@ -6,20 +6,31 @@ Python 3.8+ — no extra packages needed. The scripts use only the standard libr
 
 ## Connection config
 
-The skill auto-detects the Solr URL in this order:
+### Recommended: `.claude/connections.env`
 
-1. **`.claude/STACK.md`** in your project — recommended. Add the `Solr Connection` section:
-   ```
-   SOLR_URL: http://localhost:8983/solr
-   ```
+Copy the template into your project and fill in your values:
 
-2. **`src/main/resources/application.properties`** — reads `spring.data.solr.host` or `solr.url`
+```bash
+cp skills/solr-debug/connections.env.template .claude/connections.env
+```
 
-3. **`src/main/resources/application.yml`** — reads the same keys
+Then edit `.claude/connections.env`:
 
-4. **Environment variable** — `SOLR_URL`
+```ini
+# Solr connection for solr-debug skill
+SOLR_URL=http://localhost:8983/solr
+```
 
-5. **Default** — `http://localhost:8983/solr`
+> `.claude/connections.env` is gitignored by default. Do not commit it.
+
+### Auto-detection fallback order
+
+If `.claude/connections.env` is not present, the scripts fall back in this order:
+
+1. Environment variable — `SOLR_URL`
+2. `src/main/resources/application.properties` — reads `spring.data.solr.host` or `solr.url`
+3. `src/main/resources/application.yml` — reads the same keys
+4. Default — `http://localhost:8983/solr`
 
 ## Solr authentication
 

@@ -10,31 +10,42 @@ pip install mysql-connector-python pyyaml
 
 ## Connection config
 
-The skill auto-detects connection details in this order:
+### Recommended: `.claude/connections.env`
 
-1. **`.claude/STACK.md`** in your project — recommended. Add the `Database Connection` section:
-   ```
-   DB_HOST: localhost
-   DB_PORT: 3306
-   DB_NAME: your_database
-   DB_USER: your_user
-   DB_PASSWORD:
-   ```
-   Leave `DB_PASSWORD` blank in STACK.md — set it via env var instead.
+Copy the template into your project and fill in your values:
 
-2. **`src/main/resources/application.properties`** — reads `spring.datasource.url`, `spring.datasource.username`, `spring.datasource.password`
+```bash
+cp skills/mysql-debug/connections.env.template .claude/connections.env
+```
 
-3. **`src/main/resources/application.yml`** — reads the same Spring datasource keys
+Then edit `.claude/connections.env`:
 
-4. **Environment variables** — `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`
+```ini
+# MySQL connection for mysql-debug skill
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=your_database
+DB_USER=your_user
+DB_PASSWORD=
+```
 
-## Recommended setup (keep credentials out of files)
+Leave `DB_PASSWORD` blank and export it as an environment variable instead — never commit passwords:
 
 ```bash
 export DB_PASSWORD=your_password
 ```
 
-Add to your shell profile (`~/.zshrc` or `~/.bashrc`) or use a `.env` file that is gitignored.
+Add that export to your shell profile (`~/.zshrc` or `~/.bashrc`) so it persists across sessions.
+
+> `.claude/connections.env` is gitignored by default. Do not commit it.
+
+### Auto-detection fallback order
+
+If `.claude/connections.env` is not present, the scripts fall back in this order:
+
+1. `src/main/resources/application.properties` — reads `spring.datasource.url`, `spring.datasource.username`, `spring.datasource.password`
+2. `src/main/resources/application.yml` — reads the same Spring datasource keys
+3. Environment variables — `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`
 
 ## What the scripts do
 
