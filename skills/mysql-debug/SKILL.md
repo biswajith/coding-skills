@@ -118,3 +118,7 @@ Structure your findings as:
 
 - [scripts/mysql-schema.py](scripts/mysql-schema.py) — schema introspection
 - [scripts/mysql-query.py](scripts/mysql-query.py) — query runner and EXPLAIN helper
+
+## Additional resources
+
+- [STACK-TEMPLATE.md](STACK-TEMPLATE.md) — template for `.claude/STACK.md`

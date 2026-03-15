@@ -126,3 +126,7 @@ Fix: <specific suggestion>
 
 End with a **summary line**:
 > `X critical, Y suggestions, Z nice-to-haves. Overall: APPROVE / REQUEST CHANGES`
+
+## Additional resources
+
+- [STACK-TEMPLATE.md](STACK-TEMPLATE.md) — template for `.claude/STACK.md`

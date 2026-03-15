@@ -135,3 +135,7 @@ If yes, address items in order. For each fix, re-run the relevant section check 
 - A score ≥ 80% → safe to proceed to PR
 - A score 60–79% → PR allowed with acknowledged gaps documented
 - A score < 60% → implementation is not ready; return to coding phase
+
+## Additional resources
+
+- [STACK-TEMPLATE.md](STACK-TEMPLATE.md) — template for `.claude/STACK.md`

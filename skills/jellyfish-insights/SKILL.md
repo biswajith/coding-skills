@@ -158,3 +158,7 @@ Produce a briefing the team can use in planning:
 
 - [Jellyfish DORA guide](https://jellyfish.co/blog/) — latest Jellyfish research and benchmarks
 - Jellyfish AI Engineering Trends report: `jellyfish.co/ai-engineering-trends/`
+
+## Additional resources
+
+- [STACK-TEMPLATE.md](STACK-TEMPLATE.md) — template for `.claude/STACK.md`

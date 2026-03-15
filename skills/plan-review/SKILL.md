@@ -136,3 +136,7 @@ is fundamentally sound or needs a rethink before proceeding.>
 - **APPROVE** — plan is sound, acceptance criteria are testable, no critical gaps. Ready for `/tdd-workflow`.
 - **APPROVE WITH CONDITIONS** — plan is implementable but has known gaps that must be closed during or shortly after implementation. Document the conditions explicitly.
 - **REQUEST CHANGES** — critical issues exist that would lead to bad design, data loss, security problems, or unimplementable acceptance criteria. Return to `/architect-plan`.
+
+## Additional resources
+
+- [STACK-TEMPLATE.md](STACK-TEMPLATE.md) — template for `.claude/STACK.md`

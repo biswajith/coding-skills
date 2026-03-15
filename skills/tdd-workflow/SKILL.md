@@ -15,7 +15,7 @@ Read both files before writing any code:
 2. `.claude/plans/$ARGUMENTS.md` — the approved feature plan (acceptance criteria become test cases)
 
 If either file is missing:
-- No `STACK.md` → tell user to create it from the template in `skills/architect-plan/STACK-TEMPLATE.md`
+- No `STACK.md` → tell user to create it from the template in [STACK-TEMPLATE.md](STACK-TEMPLATE.md)
 - No plan file → tell user to run `/architect-plan` first and get it approved
 
 If no plan name was passed as an argument, ask the user which plan to implement.

@@ -99,3 +99,7 @@ If yes, address items in priority order: 🔴 → 🟡 → 🟢. For each fix:
 - If `.claude/STACK.md` exists, read it to judge style/convention comments accurately against project conventions
 - If a comment references the feature plan, cross-check `.claude/plans/` for the relevant plan doc
 - Related skills: `/architect-plan` to produce a plan, `/tdd-workflow` to implement, `/code-review` to validate, `/plan-adherence` to score compliance
+
+## Additional resources
+
+- [STACK-TEMPLATE.md](STACK-TEMPLATE.md) — template for `.claude/STACK.md`
