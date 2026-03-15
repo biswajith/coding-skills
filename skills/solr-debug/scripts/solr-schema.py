@@ -15,12 +15,16 @@ from pathlib import Path
 
 
 def find_solr_url():
-    # 1. .claude/STACK.md
-    stack_path = Path(".claude/STACK.md")
-    if stack_path.exists():
-        m = re.search(r"\*\*SOLR_URL:\*\*\s*(http[^\s\n]+)", stack_path.read_text())
-        if m:
-            return m.group(1).rstrip("/")
+    # 1. .claude/connections.env
+    env_path = Path(".claude/connections.env")
+    if env_path.exists():
+        for line in env_path.read_text().splitlines():
+            line = line.strip()
+            if line.startswith("#") or "=" not in line:
+                continue
+            k, _, v = line.partition("=")
+            if k.strip() == "SOLR_URL" and v.strip():
+                return v.strip().rstrip("/")
 
     # 2. env var
     url = os.getenv("SOLR_URL")

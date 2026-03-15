@@ -11,30 +11,30 @@ import sys
 from pathlib import Path
 
 
-def load_from_stack_md():
-    stack_path = Path(".claude/STACK.md")
-    if not stack_path.exists():
+def load_from_connections_env():
+    """Read .claude/connections.env — plain KEY=VALUE, # comments ignored."""
+    env_path = Path(".claude/connections.env")
+    if not env_path.exists():
         return None
-    text = stack_path.read_text()
-    def extract(key):
-        m = re.search(rf"\*\*{key}:\*\*\s*([^\n]+)", text)
-        if not m:
-            return None
-        v = m.group(1).strip()
-        return None if not v or v.startswith("(") else v
-
-    host = extract("DB_HOST")
-    port = extract("DB_PORT")
-    db   = extract("DB_NAME")
-    user = extract("DB_USER")
-    pwd  = extract("DB_PASSWORD")
+    props = {}
+    for line in env_path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        k, _, v = line.partition("=")
+        props[k.strip()] = v.strip()
+    host = props.get("DB_HOST")
+    port = props.get("DB_PORT")
+    db   = props.get("DB_NAME")
+    user = props.get("DB_USER")
+    pwd  = props.get("DB_PASSWORD") or os.getenv("DB_PASSWORD")
     if host or db or user:
         return {
             "host": host or "localhost",
             "port": int(port) if port and port.isdigit() else 3306,
             "database": db,
             "user": user,
-            "password": pwd or os.getenv("DB_PASSWORD"),
+            "password": pwd,
         }
     return None
 
@@ -93,7 +93,7 @@ def load_from_yaml(path: Path):
 
 
 def find_config():
-    config = load_from_stack_md()
+    config = load_from_connections_env()
     if config:
         return config
     for p in [

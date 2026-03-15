@@ -28,8 +28,18 @@ Run the introspection script to understand the relevant tables:
 python3 "${CLAUDE_SKILL_DIR}/scripts/mysql-schema.py"
 ```
 
-Connection config is auto-detected from (in order):
-1. `.claude/STACK.md`
+Connection config is auto-detected in this order:
+1. `.claude/connections.env` — preferred; copy the template and fill in your values:
+   ```bash
+   cp "${CLAUDE_SKILL_DIR}/connections.env.template" .claude/connections.env
+   ```
+   ```ini
+   DB_HOST=localhost
+   DB_PORT=3306
+   DB_NAME=myapp
+   DB_USER=root
+   DB_PASSWORD=
+   ```
 2. `src/main/resources/application.properties`
 3. `src/main/resources/application.yml`
 4. Env vars: `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`

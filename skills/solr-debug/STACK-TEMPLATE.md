@@ -49,15 +49,22 @@
 - **Deployment target:** (e.g., Docker + Kubernetes, AWS ECS)
 - **Config management:** (e.g., Spring Cloud Config, env vars)
 
-## Database Connection (used by mysql-debug skill)
-- **DB_HOST:** (e.g., localhost)
-- **DB_PORT:** (e.g., 3306)
-- **DB_NAME:** (your database name)
-- **DB_USER:** (your database user)
-- **DB_PASSWORD:** (leave blank — set via env var, do not commit passwords)
+## Debug Connections
 
-## Solr Connection (used by solr-debug skill)
-- **SOLR_URL:** (e.g., http://localhost:8983/solr)
+Copy the relevant template to `.claude/connections.env` and fill in your values:
+
+```bash
+# For mysql-debug:
+cp skills/mysql-debug/connections.env.template .claude/connections.env
+
+# For solr-debug:
+cp skills/solr-debug/connections.env.template .claude/connections.env
+```
+
+The scripts read `.claude/connections.env` first, then fall back to `application.properties`,
+`application.yml`, and finally environment variables.
+
+> Keep `.claude/connections.env` out of version control — it is gitignored by default.
 
 ## Known Constraints / Gotchas
 - (List anything the architect and reviewers should be aware of)

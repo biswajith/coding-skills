@@ -28,11 +28,17 @@ Run the schema introspection script:
 python3 "${CLAUDE_SKILL_DIR}/scripts/solr-schema.py"
 ```
 
-Connection URL is auto-detected from (in order):
-1. `.claude/STACK.md`
-2. `src/main/resources/application.properties` (`spring.data.solr.host` or `solr.url`)
-3. `src/main/resources/application.yml`
-4. Env var: `SOLR_URL`
+Connection URL is auto-detected in this order:
+1. `.claude/connections.env` — preferred; copy the template and fill in your values:
+   ```bash
+   cp "${CLAUDE_SKILL_DIR}/connections.env.template" .claude/connections.env
+   ```
+   ```ini
+   SOLR_URL=http://localhost:8983/solr
+   ```
+2. Env var: `SOLR_URL`
+3. `src/main/resources/application.properties` (`spring.data.solr.host` or `solr.url`)
+4. `src/main/resources/application.yml`
 5. Default: `http://localhost:8983/solr`
 
 ## Step 3: Debug the problem
