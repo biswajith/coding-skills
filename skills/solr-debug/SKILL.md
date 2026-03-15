@@ -25,7 +25,7 @@ Read the referenced code or error before connecting to Solr.
 Run the schema introspection script:
 
 ```bash
-python3 ~/.claude/skills/solr-debug/scripts/solr-schema.py
+python3 "${CLAUDE_SKILL_DIR}/scripts/solr-schema.py"
 ```
 
 Connection URL is auto-detected from (in order):
@@ -41,7 +41,7 @@ Connection URL is auto-detected from (in order):
 Test the exact query against Solr directly to isolate whether the issue is in the query or the data:
 
 ```bash
-python3 ~/.claude/skills/solr-debug/scripts/solr-query.py \
+python3 "${CLAUDE_SKILL_DIR}/scripts/solr-query.py" \
   --core <core_name> \
   --query "field:value" \
   --debug
@@ -56,7 +56,7 @@ The `--debug` flag fetches Solr's `debugQuery=true` output, which shows:
 Check what the field type actually does to the search terms:
 
 ```bash
-python3 ~/.claude/skills/solr-debug/scripts/solr-query.py \
+python3 "${CLAUDE_SKILL_DIR}/scripts/solr-query.py" \
   --core <core_name> \
   --analyze --field <field_name> --text "<search term>"
 ```
@@ -67,7 +67,7 @@ This calls the Solr Analysis API and shows tokenization/analysis output.
 Fetch a specific document by ID:
 
 ```bash
-python3 ~/.claude/skills/solr-debug/scripts/solr-query.py \
+python3 "${CLAUDE_SKILL_DIR}/scripts/solr-query.py" \
   --core <core_name> \
   --get-doc <id>
 ```
@@ -76,7 +76,7 @@ python3 ~/.claude/skills/solr-debug/scripts/solr-query.py \
 Check core stats, last commit time, pending deletes:
 
 ```bash
-python3 ~/.claude/skills/solr-debug/scripts/solr-schema.py --stats
+python3 "${CLAUDE_SKILL_DIR}/scripts/solr-schema.py" --stats
 ```
 
 ### Schema vs code mismatch

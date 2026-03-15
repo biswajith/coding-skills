@@ -25,7 +25,7 @@ Read the referenced code or error before connecting to the database.
 Run the introspection script to understand the relevant tables:
 
 ```bash
-python3 ~/.claude/skills/mysql-debug/scripts/mysql-schema.py
+python3 "${CLAUDE_SKILL_DIR}/scripts/mysql-schema.py"
 ```
 
 Connection config is auto-detected from (in order):
@@ -49,14 +49,14 @@ Based on the problem type, run targeted diagnostics:
 - Check `@Column(length=X)` matches actual column size
 
 ```bash
-python3 ~/.claude/skills/mysql-debug/scripts/mysql-schema.py --table <table_name>
+python3 "${CLAUDE_SKILL_DIR}/scripts/mysql-schema.py" --table <table_name>
 ```
 
 ### Query / performance issues
 Run the problematic query with `EXPLAIN` and `EXPLAIN ANALYZE`:
 
 ```bash
-python3 ~/.claude/skills/mysql-debug/scripts/mysql-query.py --explain "<SQL>"
+python3 "${CLAUDE_SKILL_DIR}/scripts/mysql-query.py" --explain "<SQL>"
 ```
 
 Look for:
@@ -69,7 +69,7 @@ Look for:
 Run targeted SELECT queries to inspect actual data:
 
 ```bash
-python3 ~/.claude/skills/mysql-debug/scripts/mysql-query.py --query "<SQL>"
+python3 "${CLAUDE_SKILL_DIR}/scripts/mysql-query.py" --query "<SQL>"
 ```
 
 ### Constraint / integrity issues
@@ -78,14 +78,14 @@ python3 ~/.claude/skills/mysql-debug/scripts/mysql-query.py --query "<SQL>"
 - Inspect trigger definitions if relevant
 
 ```bash
-python3 ~/.claude/skills/mysql-debug/scripts/mysql-query.py --query "SELECT * FROM information_schema.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA = DATABASE()"
+python3 "${CLAUDE_SKILL_DIR}/scripts/mysql-query.py" --query "SELECT * FROM information_schema.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA = DATABASE()"
 ```
 
 ### Slow query investigation
 Check recent slow queries from `performance_schema`:
 
 ```bash
-python3 ~/.claude/skills/mysql-debug/scripts/mysql-query.py --slow-queries
+python3 "${CLAUDE_SKILL_DIR}/scripts/mysql-query.py" --slow-queries
 ```
 
 ## Step 4: Report findings

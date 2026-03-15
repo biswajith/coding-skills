@@ -1,0 +1,32 @@
+---
+description: Solr integration best practices — schema design, query safety, indexing, and Spring Data Solr patterns. Apply to Java files that interact with Solr.
+globs: **/*.java
+---
+
+## Query safety
+- Never build Solr query strings by concatenating user input — use parameterized queries or `SolrQuery` builders
+- Escape user input with `ClientUtils.escapeQueryChars()` if raw string queries are unavoidable
+- Validate and bound query parameters (rows, start) — never allow unbounded result sets
+
+## Schema alignment
+- Field names in Java (`@Field`, `@SolrDocument`) must exactly match the Solr schema — they are case-sensitive
+- `multiValued=true` fields in Solr must map to a `Collection` or `List` in Java — not a scalar
+- `stored=false` fields cannot be retrieved — only searched; do not include them in `fl` (field list)
+- `indexed=false` fields cannot be searched — only stored; do not use them in `q` or filter queries
+- `docValues=true` is required for sorting and faceting — verify before using a field for either
+
+## Commit strategy
+- Never call hard commit from application code in production — configure `autoCommit` in `solrconfig.xml`
+- Use `commitWithin` for near-real-time indexing: `UpdateRequest.setCommitWithin(1000)`
+- Soft commit for visibility, hard commit for durability — understand the difference before configuring
+
+## Indexing
+- Index operations must be idempotent — re-indexing the same document must not create duplicates (use the unique key)
+- Batch index documents instead of indexing one at a time — use `SolrClient.add(Collection<SolrInputDocument>)`
+- Handle `SolrServerException` and `IOException` explicitly at the indexing boundary
+
+## Spring Data Solr
+- Use `@SolrDocument(collection = "...")` — do not rely on class name defaulting
+- Repository `@Query` annotations use Solr query syntax, not JPQL — they are not interchangeable
+- Prefer repository derived query methods for simple queries; use `@Query` for complex ones
+- Test Solr repositories with embedded Solr or a Testcontainers Solr image — not production

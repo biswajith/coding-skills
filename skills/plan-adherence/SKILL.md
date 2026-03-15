@@ -10,7 +10,7 @@ Measure how faithfully the code matches an approved plan document. Produces a sc
 
 ## Step 1: Load context
 
-1. Read `.claude/STACK.md` for project conventions
+1. Read `.claude/STACK.md` — defines ORM, repositories, migration tool, validation approach, auth mechanism, search tool, AI tools, and naming conventions. All section checks below are conditional on what is defined here.
 2. Read `.claude/plans/$ARGUMENTS.md` — the approved plan to check against
 
 If no argument is given, list available plans:
@@ -44,35 +44,35 @@ Evaluate each section of the plan against the code. Assign a score per section:
 ### Sections to check
 
 **Domain Model** — Does every planned entity, field, and relationship exist?
-- Compare plan Section 2 against `@Entity` classes
-- Check Hibernate mappings match planned fetch strategies
-- Check Liquibase/Flyway migrations cover all schema changes
+- Compare plan Section 2 against entity classes per STACK.md ORM
+- Check ORM mappings match planned fetch strategies
+- Check database migration files exist per STACK.md migration tool
 
 **Repository Layer** — Do planned repositories and custom queries exist?
-- Plan Section 3 vs `@Repository` interfaces
-- Check custom `@Query` methods match planned query patterns
-- Check Solr repository changes if planned
+- Plan Section 3 vs repository interfaces per STACK.md ORM/repository pattern
+- Check custom query methods match planned query patterns
+- Check search repository changes if planned — per STACK.md search tool
 
 **Service Layer** — Do planned service methods exist with correct transaction rules?
-- Plan Section 4 vs `@Service` classes
-- Verify `@Transactional` placement matches plan
+- Plan Section 4 vs service classes per STACK.md conventions
+- Verify transaction placement matches plan — per STACK.md transaction conventions
 - Verify business logic summary is reflected in method names/structure
 
 **REST API Contract** — Do endpoints match the plan exactly?
-- Plan Section 5 vs `@RestController` classes
+- Plan Section 5 vs controller classes per STACK.md API style
 - Method, path, request body, response body, HTTP status codes
-- Validation annotations (`@Valid`, `@NotNull`, etc.)
+- Validation annotations per STACK.md validation approach
 
-**OpenAI / ADK Integration** — If planned, is it implemented correctly?
+**AI / Agentic Integration** — If planned and STACK.md lists an AI tool:
 - Plan Section 6 — model, API type, prompt strategy, error handling
 - Retry and timeout logic present?
-- OpenAI call outside `@Transactional`?
+- AI client call outside transaction boundary?
 
-**Solr Integration** — If planned, is it implemented correctly?
-- Plan Section 7 — index changes, query patterns
+**Search Integration** — If planned and STACK.md lists a search tool:
+- Plan Section 7 — index changes, query patterns per STACK.md search tool
 
 **Security** — Are planned auth/authz rules implemented?
-- Plan Section 8 vs Spring Security config
+- Plan Section 8 vs security config per STACK.md auth mechanism
 
 **Test Coverage** — Does each acceptance criterion have a test?
 - Plan Section 9 — map each criterion to a test method

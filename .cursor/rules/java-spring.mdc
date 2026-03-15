@@ -1,0 +1,45 @@
+---
+description: Java and Spring Boot best practices — layering, transactions, entity design, REST, and general code quality. Apply to all Java source files.
+globs: **/*.java
+---
+
+## Layering
+- Controllers delegate to services — no business logic in controllers
+- Services delegate to repositories — no query construction in services
+- Entities never leak into the controller layer — always map to a DTO or record before returning
+- No `@Autowired` on fields — use constructor injection only
+
+## Transactions
+- `@Transactional` belongs on service methods, not repositories or controllers
+- Never wrap an external HTTP call (OpenAI, REST client, messaging) inside a `@Transactional` method
+- Specify `readOnly = true` on read-only service methods
+- Avoid `@Transactional` on `private` methods — Spring AOP cannot proxy them
+
+## Entity and ORM design
+- Fetch strategy must be explicit on every `@OneToMany` and `@ManyToOne` — no implicit EAGER
+- Every `@OneToMany` collection must have an index on the foreign key column
+- Use `@EntityGraph` or `JOIN FETCH` for queries that need associated data — avoid N+1
+- Bidirectional relationships must have a helper method to keep both sides in sync
+- Entities must not implement `Serializable` unless there is a clear reason
+- `equals()` and `hashCode()` on entities must be based on a natural business key, not the generated ID
+- Never expose mutable entity collections directly — return unmodifiable views or copy to a new list
+
+## Repositories
+- Use Spring Data derived query methods for simple queries
+- Use `@Query` with JPQL for anything complex — fall back to native SQL only when JPQL is insufficient and document why
+- Never build query strings by concatenating user input
+
+## REST API
+- Use `@RestController` + `@RequestMapping` — never mix `@Controller` and manual `@ResponseBody`
+- Validate all request bodies with `@Valid` and JSR-380 annotations on the DTO/record
+- Use `@ControllerAdvice` + `@ExceptionHandler` for all error responses — no raw exceptions to the client
+- Return `ProblemDetail` (RFC 9457) for error responses — consistent structure across all endpoints
+- Use `ResponseEntity<Void>` for 204 No Content — do not return `null`
+
+## Code quality
+- No method longer than 30 lines — extract to a private method or a collaborator
+- No magic numbers or strings — use named constants or enums
+- Logging must use parameterized SLF4J form: `log.info("id={}", id)` not string concatenation
+- No `System.out.println`, `e.printStackTrace()`, or raw `java.util.logging`
+- No commented-out code in committed files
+- `Optional` must not be used as a method parameter or field — only as a return type

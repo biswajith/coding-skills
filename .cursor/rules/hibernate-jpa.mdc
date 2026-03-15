@@ -1,0 +1,35 @@
+---
+description: Hibernate and JPA best practices — fetch strategies, N+1 prevention, schema mapping, and persistence context management. Apply to entity and repository Java files.
+globs: **/{entity,entities,model,domain,repository,repositories}/**/*.java
+---
+
+## Fetch strategy
+- Default fetch for `@OneToMany` and `@ManyToMany` is LAZY — keep it that way
+- Default fetch for `@ManyToOne` and `@OneToOne` is EAGER — override to LAZY unless the association is always needed
+- Load associations eagerly only in the query, not on the mapping: use `JOIN FETCH` in JPQL or `@EntityGraph`
+
+## N+1 prevention
+- Any method that returns a collection of entities and accesses their associations must use `JOIN FETCH` or `@EntityGraph`
+- When in doubt, enable `spring.jpa.properties.hibernate.generate_statistics=true` in dev to see query counts
+
+## Schema mapping
+- Every entity must have `@Table(name = "...")` — do not rely on default naming
+- Every column must have `@Column(name = "...")` — do not rely on default naming
+- String columns must declare `@Column(length = N)` explicitly — default 255 is often wrong
+- Nullable columns must have `@Column(nullable = true)` — make intent explicit
+- Use `@CreationTimestamp` and `@UpdateTimestamp` for audit fields instead of manual lifecycle callbacks
+
+## IDs
+- Prefer `IDENTITY` strategy for MySQL: `@GeneratedValue(strategy = GenerationType.IDENTITY)`
+- Do not use `AUTO` — it can silently switch strategies
+- Do not expose numeric surrogate IDs in public APIs — use a UUID or opaque token externally
+
+## Lifecycle and session
+- Never access a lazy collection after the session is closed — this causes `LazyInitializationException`
+- Fetch everything you need within the transaction boundary
+- Do not use `OSIV` (Open Session in View) — disable it: `spring.jpa.open-in-view=false`
+
+## Liquibase / Flyway
+- Never use `spring.jpa.hibernate.ddl-auto=update` or `create` in any environment except local throw-away testing
+- All schema changes go through migration scripts — entities reflect the migration, not the other way around
+- Migration scripts are immutable once merged — never edit an applied migration

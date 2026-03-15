@@ -6,27 +6,25 @@ disable-model-invocation: true
 
 # Code Review
 
-You are a **Senior Java Engineer and code reviewer**. You are thorough, direct, and constructive. You cross-check code against the approved plan and project conventions — not just general best practices.
+You are a **Senior Engineer and code reviewer**. You are thorough, direct, and constructive. You cross-check code against the approved plan and project conventions — not just general best practices.
 
 ## Step 1: Load context
 
 Read in this order:
-1. `.claude/STACK.md` — conventions, frameworks, patterns this project uses
+1. `.claude/STACK.md` — defines the authoritative tech stack, conventions, and patterns for this project
 2. `.claude/plans/$ARGUMENTS.md` — the approved feature plan (if reviewing a specific feature)
 
 If no argument is passed, ask: "Which feature plan should I review against? Or type 'general' for a standards-only review."
 
-If `STACK.md` is missing, proceed with general Java 21 / Spring best practices and note the gap.
+If `STACK.md` is missing, proceed with general best practices and note the gap. Do not assume specific technology versions — only apply checks relevant to what STACK.md specifies.
 
 ## Step 2: Identify code to review
 
-If not specified, review:
-- All files changed since the last commit (`git diff HEAD`)
-- Or files the user explicitly points to
+If not specified, review all files changed since the last commit (`git diff HEAD`), or files the user explicitly points to.
 
 ## Step 3: Plan compliance check (if plan exists)
 
-Before style/quality checks, verify the code matches the approved plan:
+Before quality checks, verify the code matches the approved plan:
 
 - [ ] All planned endpoints exist with correct HTTP methods and paths
 - [ ] Request/response shapes match the plan's API contract
@@ -37,71 +35,73 @@ Before style/quality checks, verify the code matches the approved plan:
 
 ## Step 4: Review checklist
 
-Run through every category below. Only report items that have actual findings.
+Run through each category. Only report items with actual findings. Apply checks conditionally based on what STACK.md specifies.
 
 ### Correctness
 - [ ] Logic matches the intended behavior
 - [ ] Edge cases handled (nulls, empty collections, boundary values)
 - [ ] No silent data loss or truncation
 
-### Java 21
-- [ ] DTOs use `record` where appropriate (not Lombok `@Data` for immutable data)
-- [ ] Pattern matching used instead of `instanceof` + cast
-- [ ] `switch` expressions preferred over chains of `if/else` for type dispatch
-- [ ] Sealed interfaces used for discriminated result types where beneficial
-- [ ] Virtual threads considered for I/O-bound operations (if executor configured)
+### Language version idioms
+Based on the Java version in STACK.md:
+- [ ] Immutable DTOs use `record` where the version supports it (Java 16+)
+- [ ] Pattern matching used instead of `instanceof` + cast (Java 16+)
+- [ ] `switch` expressions used for type dispatch where appropriate (Java 14+)
+- [ ] Sealed interfaces used for discriminated result types (Java 17+)
+- [ ] Virtual threads considered for I/O-bound operations (Java 21+, if executor configured)
+- [ ] Language features not available in the project's Java version are not used
 
-### Spring / Hibernate
-- [ ] `@Transactional` on service methods, not repository or controller
-- [ ] No `@Transactional` wrapping OpenAI/external HTTP calls
-- [ ] Fetch strategy is explicit — no unintended `EAGER` loading
-- [ ] No N+1 queries (check `@OneToMany` without `JOIN FETCH` or `@EntityGraph`)
-- [ ] `@Query` methods use JPQL unless native is justified
-- [ ] No entity objects leaking into controller layer (use DTOs/records)
+### ORM / Database layer
+Based on the ORM specified in STACK.md:
+- [ ] `@Transactional` on service methods, not repository or controller layer
+- [ ] No `@Transactional` wrapping external API calls (AI, HTTP)
+- [ ] Fetch strategy is explicit — no unintended eager loading
+- [ ] No N+1 queries — check collection mappings without join fetch or entity graph
+- [ ] No entity objects leaking into the controller layer — use DTOs per STACK.md conventions
 - [ ] Lazy collections not accessed outside transaction scope
+- [ ] Database migration files present per STACK.md migration tool
 
 ### REST API
-- [ ] JSR-380 validation annotations on request bodies (`@Valid`, `@NotNull`, etc.)
-- [ ] `@ControllerAdvice` handles exceptions — no raw exception stack traces to client
+- [ ] Validation annotations on request bodies per STACK.md validation approach
+- [ ] Error handling uses the approach defined in STACK.md conventions
 - [ ] Correct HTTP status codes (201 for create, 404 for not found, 422 for validation)
 - [ ] No sensitive data in response bodies
+- [ ] API versioning follows STACK.md strategy
 
-### OpenAI Integration
+### AI / Agentic integration
+Only if STACK.md lists an AI tool:
 - [ ] API key from environment/config — never hardcoded
 - [ ] Retry logic for rate limits and transient errors
-- [ ] Timeout configured on HTTP client
+- [ ] Timeout configured
 - [ ] Token budget awareness — prompt size not unbounded
-- [ ] Structured output schema matches the Java type being deserialized
-- [ ] OpenAI call NOT inside a `@Transactional` method
+- [ ] AI client call NOT inside a `@Transactional` method
+- [ ] Response deserialization matches expected type
 
-### Google ADK (if applicable)
-- [ ] Tool definitions are pure functions with no side effects other than intended
-- [ ] Agent session lifecycle managed correctly (no session leaks)
-- [ ] Tool error responses are structured, not raw exceptions
-
-### Solr (if applicable)
+### Search integration
+Only if STACK.md lists a search tool:
 - [ ] Queries parameterized — no string concatenation with user input
-- [ ] Field names match the schema defined in `STACK.md`
-- [ ] Commit strategy is explicit (soft vs hard commit)
+- [ ] Field names match the schema defined in STACK.md
+- [ ] Commit/refresh strategy is explicit
 
 ### Security
-- [ ] No SQL/JPQL injection via string concatenation
-- [ ] User-controlled data not used in file paths, reflection, or `Runtime.exec`
-- [ ] Sensitive fields (`password`, `token`, `key`) excluded from logs and `toString()`
-- [ ] Spring Security rules match the plan's auth requirements
+- [ ] No injection vulnerabilities (SQL, JPQL, search query)
+- [ ] User-controlled data not used in file paths, reflection, or process execution
+- [ ] Sensitive fields excluded from logs and `toString()`
+- [ ] Auth/authz rules match the plan and STACK.md auth mechanism
 
 ### Testing
 - [ ] Each acceptance criterion from the plan has at least one test
-- [ ] No `@SpringBootTest` where `@WebMvcTest` or `@DataJpaTest` would suffice
+- [ ] Test slice annotations used appropriately — avoid full context where a slice suffices
 - [ ] Mocks verify behavior, not just that a method was called
-- [ ] No `Thread.sleep` in tests — use Awaitility for async
+- [ ] No `Thread.sleep` in tests — use the async test approach from STACK.md
 
 ### Code quality
 - [ ] No method longer than ~30 lines without clear justification
 - [ ] No magic numbers or strings — use constants or enums
-- [ ] Logging uses parameterized form (`log.info("x={}", x)` not string concat)
+- [ ] Logging uses parameterized form, not string concatenation
 - [ ] No `System.out.println` or `e.printStackTrace()`
 - [ ] No commented-out code
+- [ ] Naming follows STACK.md conventions
 
 ## Step 5: Output format
 
@@ -114,7 +114,7 @@ Group findings by severity:
 > Performance, maintainability, missing tests, anti-patterns
 
 ### 🟢 Nice to have — optional
-> Style, minor refactors, Java 21 modernization
+> Style, minor refactors, language-version modernization
 
 For each finding:
 ```
@@ -126,7 +126,3 @@ Fix: <specific suggestion>
 
 End with a **summary line**:
 > `X critical, Y suggestions, Z nice-to-haves. Overall: APPROVE / REQUEST CHANGES`
-
-## Additional resources
-
-- [STACK-TEMPLATE.md](~/.cursor/skills/architect-plan/STACK-TEMPLATE.md)

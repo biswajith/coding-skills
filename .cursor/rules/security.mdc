@@ -1,0 +1,33 @@
+---
+description: Security best practices for Spring Boot web applications — injection prevention, secret handling, auth, and data exposure. Apply to all Java source files.
+globs: **/*.java
+---
+
+## Injection prevention
+- Never concatenate user input into JPQL, SQL, Solr queries, or shell commands
+- Use parameterized queries, `@Query` with named parameters, or query builder APIs exclusively
+- Validate and sanitize all user input at the controller boundary before it reaches the service layer
+
+## Secrets and credentials
+- No secrets, API keys, passwords, or tokens in source code or committed config files
+- Use environment variables or a secrets manager (Vault, AWS Secrets Manager) for all credentials
+- Exclude credential fields from `toString()`, `@JsonSerialize`, and log output
+- Rotate credentials if they are ever logged or committed — treat it as compromised
+
+## Authentication and authorization
+- Every endpoint must have an explicit security rule — no implicit open access
+- Use method-level security (`@PreAuthorize`) for fine-grained authorization in services
+- Never trust client-supplied user IDs — resolve the authenticated principal from `SecurityContextHolder`
+- JWT tokens must be validated on every request — signature, expiry, and issuer
+
+## Data exposure
+- Response DTOs must never include fields the caller is not authorized to see
+- Paginated endpoints must have a maximum page size — never return unbounded results
+- Sensitive fields (`password`, `ssn`, `token`, `secret`) must be excluded from all API responses
+- Use `@JsonIgnore` or a dedicated response record — not the entity directly
+
+## Spring Security config
+- CSRF protection must be enabled for browser-facing endpoints; can be disabled for stateless API-only apps with JWT
+- CORS must be explicitly configured — do not use `@CrossOrigin("*")` in production
+- `HttpSecurity` config must deny all unmatched requests by default: `.anyRequest().denyAll()`
+- Store passwords with `BCryptPasswordEncoder` (strength ≥ 12) — never MD5, SHA-1, or plain text

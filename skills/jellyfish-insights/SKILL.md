@@ -9,6 +9,10 @@ allowed-tools: Bash(curl *), Bash(gh *)
 
 Pull engineering intelligence from Jellyfish to inform planning, retrospectives, and delivery decisions.
 
+## Step 0: Load project context
+
+If `.claude/STACK.md` exists, read it to understand the team's tech stack. Use this context when interpreting Jellyfish metrics — e.g., AI tool ROI checks should reference the AI tools listed in STACK.md, and delivery insights should account for the frameworks and integration patterns in use.
+
 ## Setup: Configure access
 
 Read `.claude/jellyfish.md` for your Jellyfish instance config. If it doesn't exist, ask the user to create it:

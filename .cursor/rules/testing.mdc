@@ -1,0 +1,44 @@
+---
+description: Testing best practices for Spring Boot applications — test slice selection, Mockito usage, assertion quality, and async testing. Apply to all Java test files.
+globs: **/*Test.java, **/*Tests.java, **/*IT.java, **/*Spec.java
+---
+
+## Test slice selection
+- Use the lightest slice that covers what you're testing:
+  - `@WebMvcTest` for controllers — no service or repository beans loaded
+  - `@DataJpaTest` for repositories — no web layer, uses in-memory or Testcontainers DB
+  - `@Service` unit tests with plain Mockito — no Spring context at all
+  - `@SpringBootTest` only for true end-to-end integration tests
+- Loading the full context for a unit test is a smell — it slows the suite and hides coupling
+
+## Naming
+- Test method names must describe behavior: `should_<outcome>_when_<condition>`
+- Test class name matches the class under test with `Test` suffix: `OrderServiceTest`
+- Integration test class uses `IT` suffix: `OrderRepositoryIT`
+
+## Mockito
+- Use `@ExtendWith(MockitoExtension.class)` — not the legacy `@RunWith`
+- Prefer `@Mock` + `@InjectMocks` over manual `new` construction in `@BeforeEach`
+- Use `ArgumentCaptor` to verify what was passed to a mock — not just that it was called
+- Do not mock types you don't own (e.g., `HttpServletRequest`) — use the provided test utilities instead
+- Verify behavior, not implementation: assert on outputs and state, not on every mock interaction
+
+## Assertions
+- Use AssertJ fluent assertions — not JUnit `assertEquals` directly
+- Assert the full relevant state, not just one field — partial assertion hides regressions
+- Never use `assertTrue(result != null)` — use `assertThat(result).isNotNull()`
+
+## Async and time
+- No `Thread.sleep()` in tests — use `Awaitility` for async assertions
+- Use `@MockBean` for Spring-managed beans in slice tests — not `Mockito.mock()` directly
+- Use fixed clocks for time-dependent logic: inject `Clock` as a bean, not `LocalDateTime.now()`
+
+## Database tests
+- `@DataJpaTest` rolls back after each test by default — rely on this, do not commit
+- Use Testcontainers for integration tests that need a real database engine
+- Do not share mutable test data between test methods — each test sets up its own state
+
+## Coverage
+- Every acceptance criterion from the feature plan must have at least one test
+- Aim for behavior coverage, not line coverage — a test that covers a line without asserting anything is worthless
+- Edge cases to always cover: null input, empty collection, boundary values, permission denied

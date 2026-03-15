@@ -96,6 +96,6 @@ If yes, address items in priority order: 🔴 → 🟡 → 🟢. For each fix:
 ## Notes
 
 - Resolved/outdated comments (where `position` is null) are noted but deprioritized
-- If `STACK.md` exists, use it to judge style/convention comments accurately
+- If `.claude/STACK.md` exists, read it to judge style/convention comments accurately against project conventions
 - If a comment references the feature plan, cross-check `.claude/plans/` for the relevant plan doc
-- If `STACK.md` exists, use it to judge style/convention comments accurately — run `/architect-plan` to produce the initial plan, `/tdd-workflow` to implement, `/code-review` to validate
+- Related skills: `/architect-plan` to produce a plan, `/tdd-workflow` to implement, `/code-review` to validate, `/plan-adherence` to score compliance

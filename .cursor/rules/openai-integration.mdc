@@ -1,0 +1,36 @@
+---
+description: OpenAI integration best practices — API key handling, retry, timeouts, prompt design, structured output, and cost control. Apply to Java files that call the OpenAI API.
+globs: **/*.java
+---
+
+## Credentials
+- API key must come from environment variable or Spring config — never hardcode or log it
+- Use `@Value("${openai.api-key}")` or a `@ConfigurationProperties` class — never inline the string
+- Exclude API key from all log output and `toString()` methods
+
+## Resilience
+- All OpenAI calls must have a timeout configured on the HTTP client (recommended: 30s read timeout)
+- Retry on `429 Too Many Requests` with exponential backoff — use Resilience4j or Spring Retry
+- Retry on `5xx` transient errors with a max of 3 attempts
+- Always handle `OpenAIException` at the service boundary — never let it propagate to the controller raw
+
+## Transaction boundaries
+- Never call the OpenAI API inside a `@Transactional` method
+- If you need to persist results of an AI call, call OpenAI first, then open a transaction to persist
+
+## Prompt design
+- Prompts must not be unbounded — always set a `max_tokens` or equivalent limit
+- User-supplied content injected into a prompt must be sanitized and bounded in length
+- System prompts belong in config or resource files — not hardcoded in Java strings
+- Document the token budget for each prompt in a comment: expected input tokens + max output tokens
+
+## Structured output
+- Prefer structured output (JSON mode or response_format) over parsing free-text responses
+- The Java type used for deserialization must match the schema exactly — validate on startup if possible
+- Handle `null` fields in the response gracefully — the model may omit optional fields
+
+## Cost control
+- Use the cheapest model that meets accuracy requirements — document the model choice and why
+- Batch requests where the API supports it
+- Log token usage (`prompt_tokens`, `completion_tokens`) at DEBUG level for cost monitoring
+- Do not call the API in a loop without a circuit breaker or rate limit guard

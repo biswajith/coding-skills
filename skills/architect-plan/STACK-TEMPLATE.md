@@ -1,7 +1,8 @@
 # STACK.md — Project Tech Stack
 
 > Copy this file to `.claude/STACK.md` in your project root and fill it in.
-> This file is read by the architect-plan, tdd-workflow, code-review, and github-review-comments skills.
+> Read by ALL skills: architect-plan, tdd-workflow, code-review, plan-adherence,
+> github-review-comments, mysql-debug, solr-debug, and jellyfish-insights.
 > Delete sections that don't apply to your stack.
 
 ## Project Overview
@@ -47,6 +48,16 @@
 ## Infrastructure
 - **Deployment target:** (e.g., Docker + Kubernetes, AWS ECS)
 - **Config management:** (e.g., Spring Cloud Config, env vars)
+
+## Database Connection (used by mysql-debug skill)
+- **DB_HOST:** (e.g., localhost)
+- **DB_PORT:** (e.g., 3306)
+- **DB_NAME:** (your database name)
+- **DB_USER:** (your database user)
+- **DB_PASSWORD:** (leave blank — set via env var, do not commit passwords)
+
+## Solr Connection (used by solr-debug skill)
+- **SOLR_URL:** (e.g., http://localhost:8983/solr)
 
 ## Known Constraints / Gotchas
 - (List anything the architect and reviewers should be aware of)
